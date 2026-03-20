@@ -1,13 +1,7 @@
 {
   "name": "NewBroker Laravel Dev",
-  "image": "mcr.microsoft.com/devcontainers/php:1-8.1-bullseye",
-  "features": {
-    "ghcr.io/devcontainers-extra/features/mysql-server:1": {
-      "rootPassword": ""
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts"
-    }
+  "build": {
+    "dockerfile": "Dockerfile"
   },
   "forwardPorts": [8000, 3306],
   "postCreateCommand": "chmod +x .devcontainer/setup.sh && .devcontainer/setup.sh",

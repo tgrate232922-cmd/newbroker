@@ -13,17 +13,22 @@ fi
 echo "📦 Installing Node dependencies..."
 npm install
 
-echo "🗄️ Setting up database..."
+echo "🗄️ Starting MySQL..."
+sudo service mysql start
+
 # Wait for MySQL to be ready
 for i in {1..30}; do
-    if mysql -u root -e "SELECT 1" &>/dev/null; then
+    if sudo mysql -u root -e "SELECT 1" &>/dev/null; then
+        echo "MySQL is ready!"
         break
     fi
     echo "Waiting for MySQL... ($i/30)"
     sleep 1
 done
 
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS newbroker;"
+echo "🗄️ Setting up database..."
+sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS newbroker;"
+sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;" 2>/dev/null || true
 
 # Update .env database settings
 sed -i 's/DB_DATABASE=.*/DB_DATABASE=newbroker/' .env
@@ -34,12 +39,12 @@ sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
 # Import SQL dump if it exists
 if [ -f database/dumps/newbroker.sql ]; then
     echo "📥 Importing database dump..."
-    mysql -u root newbroker < database/dumps/newbroker.sql
+    sudo mysql -u root newbroker < database/dumps/newbroker.sql
     echo "✅ Database imported from dump!"
 else
     echo "⚠️  No SQL dump found at database/dumps/newbroker.sql"
     echo "   You can drag & drop your .sql file into the editor and run:"
-    echo "   mysql -u root newbroker < your-file.sql"
+    echo "   sudo mysql -u root newbroker < your-file.sql"
     echo ""
     echo "   Running migrations instead..."
     php artisan migrate --force || true
